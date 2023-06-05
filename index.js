@@ -1,12 +1,25 @@
 import { HebrewCalendar, Location, gematriya } from '@hebcal/core';
+import dateFormat from "dateformat";
 
-const EREV = 1048576;
+const dateOutputFormat = "yyyy-mm-dd";
+const mainOptions = {
+  start: new Date("2021/01/01"),
+  end: new Date("2023/12/31"),
+  location: Location.lookup('Jerusalem'),
+  sedrot: false,
+  omer: false,
+  noModern: false,
+  noSpecialShabbat: true,
+  noRoshChodesh: true,
+  noMinorFast: true
+}
+
 const skip = [
-  'תענית בכורות',
   'צום גדליה',
-  'צום תמוז',
-  "תענית אסתר",
   "עשרה בטבת",
+  "תענית אסתר",
+  'תענית בכורות',
+  'צום תמוז',
 
   "טו בשבט",
   "פורים קטן",
@@ -30,56 +43,38 @@ const skip = [
   "יום המשפחה"
 ]
 
-const options = {
-  start: new Date("2021/01/01"),
-  end: new Date("2023/01/01"),
+const EREV = 1048576;
+
+const options = Object.assign(mainOptions, {
   isHebrewYear: false,
   candlelighting: false,
-  location: Location.lookup('Jerusalem'),
-  sedrot: false,
-  omer: false,
-  noSpecialShabbat: true,
-  noModern: false,
-  noRoshChodesh: true,
-  noMinorFast: true,
   addHebrewDates: true,
-};
+});
 
 const events = HebrewCalendar.calendar(options);
-
 const days = {}
 
 for (const ev of events) {
   const hd = ev.getDate();
-  const key = hd.greg().toLocaleDateString("en-GB")
-
-  let dateRow = false;
-  if (!days[key]) {
-    days[key] = []
-    dateRow = true;
-  }
-
+  const commonDate = dateFormat(hd.greg(), dateOutputFormat);
   const data = ev.render('he-x-NoNikud');
 
-  if (!dateRow) {
-    if (ev.chanukahDay) {
-      days[key].push("חנוכה " + gematriya(ev.chanukahDay))
-    }
-    else if (skip.indexOf(data) < 0 && data.indexOf("חנוכה:") < 0 && (ev.mask & EREV) === 0) {
-      days[key].push(data)
-    }
+  if (!days[commonDate]) {
+    days[commonDate] = []
+    // split by first and last space (needed for adar alef/beth)
+    const regex = /^([^ ]*) | (?=[^ ]*$)/g;
+    days[commonDate] = data.split(regex).filter(n => n);
   }
   else {
-    const datArr = data.split(" ");
-
-    if (datArr.length == 4) {
-      datArr[1] = datArr[1] + " " + datArr[2];
-      datArr.splice(2, 1);
+    if (ev.chanukahDay) {
+      days[commonDate].push("חנוכה " + gematriya(ev.chanukahDay))
     }
-    days[key] = datArr
+    else if (skip.indexOf(data) < 0 && data.indexOf("חנוכה:") < 0 && (ev.mask & EREV) === 0) {
+      days[commonDate].push(data)
+    }
   }
 }
 
 for (let nxt in days) {
-  console.log(nxt + ";" + days[nxt].concat(new Array(5 - days[nxt].length)).join(";") + ";")
+  console.log([nxt].concat(days[nxt], new Array(6 - days[nxt].length)).join(";"))
 }

@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-    "type": "module",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +13,6 @@
   "dependencies": {
     "@hebcal/core": "^4.0.3",
     "@types/node": "^18.0.6",
-    "node-fetch": "^3.2.6"
+    "dateformat": "^5.0.3"
   }
 }
