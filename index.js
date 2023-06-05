@@ -3,8 +3,8 @@ import dateFormat from "dateformat";
 
 const dateOutputFormat = "yyyy-mm-dd";
 const mainOptions = {
-  start: new Date("2021/01/01"),
-  end: new Date("2023/12/31"),
+  year: 2021, // start from
+  numYears: 20, // do for number of years
   location: Location.lookup('Jerusalem'),
   sedrot: false,
   omer: false,
